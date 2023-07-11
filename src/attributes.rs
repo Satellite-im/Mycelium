@@ -7,6 +7,7 @@ pub enum Attribute {
     OriginSpore(Sporeprint),     // Used to identify the Spore which created the Mycelium.
     OriginMoment(u128),          // Represented as nanoseconds since UNIX_EPOCH.
     OriginSignature(Vec<u8>),    // Used to verify the origin of the Mycelium.
+    LastUpdate(u128),            // Represented as nanoseconds since UNIX_EPOCH. Useful for picking the most recent Mycelium when pruning.
 }
 impl Attribute {
     /// Compares the variants of the attributes without checking their values.
@@ -20,6 +21,7 @@ impl Attribute {
         match self {
             Attribute::OriginSpore(sporeprint) => hasher.update(sporeprint),
             Attribute::OriginMoment(moment) => hasher.update(moment.to_string()),
+            Attribute::LastUpdate(moment) => hasher.update(moment.to_string()),
             Attribute::OriginSignature(_) => (), // Ignore the signature, since it would change the hash as soon as we sign.
         }
 
@@ -63,10 +65,20 @@ impl Mycelium {
 }
 
 impl Mycelium {
+    /// Adds an attribute to the Mycelium. This will replace existing attributes with the same variant.
     pub fn set_attr(&mut self, attribute: Attribute) -> Result<(), MyceliumError> {
         self.attributes.retain(|x_attr| !x_attr.shallow_eq(&attribute));
         self.attributes.push(attribute);
 
         Ok(())
+    }
+
+    /// Updates the `LastUpdate` attribute to the current time.
+    pub fn set_update(&mut self) -> Result<(), MyceliumError> {
+        let now = std::time::SystemTime::now()
+            .duration_since(std::time::SystemTime::UNIX_EPOCH)?
+            .as_nanos();
+
+        self.set_attr(Attribute::LastUpdate(now))
     }
 }
