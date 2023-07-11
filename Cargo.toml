@@ -8,3 +8,6 @@ edition = "2021"
 [dependencies]
 thiserror = "1.0.43"
 displaydoc = "0.2"
+did-key = { git = "https://github.com/Satellite-im/did-key.rs", branch = "backport-patch-v0" }
+hex = "0.4.3"
+sha2 = "0.10.6"

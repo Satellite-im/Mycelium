@@ -1,15 +1,29 @@
+use sha2::{Sha256, Digest};
+
 use crate::{spore::Sporeprint, mycelium::Mycelium, errors::MyceliumError};
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Hash)]
 pub enum Attribute {
-    OriginSpore(Sporeprint),    // Used to identify the Spore which created the Mycelium.
-    OriginMoment(u128),         // Represented as nanoseconds since UNIX_EPOCH.
-    OriginSignature(Vec<u8>),   // Used to verify the origin of the Mycelium.
+    OriginSpore(Sporeprint),     // Used to identify the Spore which created the Mycelium.
+    OriginMoment(u128),          // Represented as nanoseconds since UNIX_EPOCH.
+    OriginSignature(Vec<u8>),    // Used to verify the origin of the Mycelium.
 }
 impl Attribute {
     /// Compares the variants of the attributes without checking their values.
     pub fn shallow_eq(&self, other: &Self) -> bool {
         std::mem::discriminant(self) == std::mem::discriminant(other)
+    }
+
+    pub fn get_hash(&self) -> String {
+        let mut hasher = Sha256::new();
+
+        match self {
+            Attribute::OriginSpore(sporeprint) => hasher.update(sporeprint),
+            Attribute::OriginMoment(moment) => hasher.update(moment.to_string()),
+            Attribute::OriginSignature(_) => (), // Ignore the signature, since it would change the hash as soon as we sign.
+        }
+
+        hex::encode(hasher.finalize())
     }
 }
 
