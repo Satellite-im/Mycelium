@@ -62,6 +62,26 @@ impl Mycelium {
 
         origin
     }
+
+    pub fn has_origin(&self) -> bool {
+        let mut has_spore = false;
+        let mut has_moment = false;
+
+        for attr in &self.attributes {
+            match attr {
+                Attribute::OriginSpore(_) => has_spore = true,
+                Attribute::OriginMoment(_) => has_moment = true,
+                _ => (),
+            }
+
+            // Early exit if both attributes are found
+            if has_spore && has_moment {
+                return true;
+            }
+        }
+
+        has_spore && has_moment
+    }
 }
 
 impl Mycelium {
