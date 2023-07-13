@@ -90,8 +90,6 @@ impl Mycelium {
     
         Ok(None) // If we didn't find the sporeprint anywhere, return None.
     }
-
-    // we only need a complete mycelium from the first occurance in the hyphae, so we could
 }
 
 impl Mycelium {
